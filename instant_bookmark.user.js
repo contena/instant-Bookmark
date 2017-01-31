@@ -5,31 +5,34 @@
 // @include     http://www.pixiv.net/bookmark_detail.php?illust_id=*
 // @include     http://www.pixiv.net/recommended.php
 // @include     http://www.pixiv.net/search.php*
+// @include     http://www.pixiv.net/bookmark_new_illust.php
 // @version     1
 // @grant       none
 // ==/UserScript==
 var beforeRecommnedSize = 0;
 
 $(function(){
-  //検索結果の数と、おすすめ作品の数を取得
+  //検索結果の数を取得（フォロー新着ページも）
 //   var userSize = $("._image-items.no-user > .image-item").size();
   var searchSize = $("._image-items.autopagerize_page_element > .image-item").size();
 //   console.log(searchSize);
-  var recommendSize = $("._image-items.no-response > .image-item").size();
-//   console.log(recommendSize);
-  beforeRecommendSize = recommendSize;
 
   /*
   他の絵の部分にはdata-tagsの値が入っていないので取得できない？
   */
   
-  //検索結果の作品の数は変わらないので、最初にやって終了　検索画面以外の場合はやらない
+  //検索結果の作品の数は変わらないので、最初にやって終了　
+  //フォロー新着ページでも使用しているクラスが同じなため起動する
   if(searchSize !== 0){
     for(var i =0; i < searchSize; i++){
       addLinkUserWorks(i);
     }
   }
   //おすすめ作品の処理
+    var recommendSize = $("._image-items.no-response > .image-item").size();
+//   console.log(recommendSize);
+  beforeRecommendSize = recommendSize;
+
    setInterval(autoUpdate,5000);
   
   //ブックマークボタンが押されたときに呼び出し
@@ -38,14 +41,17 @@ $(function(){
     var id = $(this).attr("data-check");
     console.log(id);
     var illustId = $(this).attr("id");
+    //ボタンが押された部分のimage-itemからタグを取得
+    var tag = $(this).parent().find("._thumbnail.ui-scroll-view").attr("data-tags");
+//    console.log(tag);
     console.log(illustId);
-    addBookmark(illustId,id);
+    addBookmark(illustId,id,tag);
   });
 
 });
 
 function autoUpdate(){
-     var recommendSize = $("._image-items.no-response > .image-item").size();
+    var recommendSize = $("._image-items.no-response > .image-item").size();
      if(recommendSize != beforeRecommendSize){
        for(var i =0; i < recommendSize; i++){
          if(!$("._image-items.no-response> .image-item:eq("+i+") > input").hasClass("addBookmark")){
@@ -62,6 +68,9 @@ function addLinkUserWorks(i){
     var url = $("._image-items > .image-item:eq("+i+") > a:nth-child(1)").attr("href");
     var position = url.indexOf("id=");
     var id = url.slice(position + 3);
+    if(id.indexOf("&") !== -1){
+     id = id.substring(0,id.indexOf("&"));
+    }
 //     $("._image-items.no-user > .image-item:eq("+i+")").append('<a href=http://www.pixiv.net/bookmark_add.php?type=illust&illust_id=' +id+ '>ブックマークに追加</a>');
       $("._image-items > .image-item:eq("+i+")").append('<br><input id='+id+' class='+ "addBookmark" +' type="button" value=ブックマーク data-check='+ i +'>');
 }
@@ -72,13 +81,16 @@ function addLinkRecommendWorks(i){
     var position = url.indexOf("id=");
     var id = url.slice(position + 3);
     id = id.substring(0,id.indexOf("&")); 
+    if(id.indexOf("&") !== -1){
+     id = id.substring(0,id.indexOf("&"));
+    }
 //     $("._image-items.no-response > .image-item:eq("+i+")").append('<br><a class='+ "addBookmark"+' href=http://www.pixiv.net/bookmark_add.php?type=illust&illust_id=' +id+ '>ブックマークに追加</a>');
     $("._image-items.no-response > .image-item:eq("+i+")").append('<br><input id='+id+' class='+ "addBookmark" +' type="button" value=ブックマーク data-check='+ i +'>');
   
 }
 
-function addBookmark(illustId,id){
-  var tag = $("._image-items > .image-item:eq("+id+") > .work._work > ._layout-thumbnail > ._thumbnail.ui-scroll-view").attr("data-tags");
+function addBookmark(illustId,id,tag){
+  //var tag = $("._image-items > .image-item:eq("+id+") > .work._work > ._layout-thumbnail > ._thumbnail.ui-scroll-view").attr("data-tags");
   
   console.log(tag);
   $.ajax({
