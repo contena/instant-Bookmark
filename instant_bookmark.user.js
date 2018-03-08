@@ -6,6 +6,7 @@
 // @include     https://www.pixiv.net/bookmark_detail.php?illust_id=*
 // @include     https://www.pixiv.net/recommended.php
 // @include     https://www.pixiv.net/search.php*
+// @require 		http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js
 // @include     https://www.pixiv.net/bookmark_new_illust.php
 // @version     1.0.1
 // @grant       none
@@ -13,9 +14,10 @@
 var beforeRecommnedSize = 0;
 
 $(function(){
+  console.log("tes");
   //検索結果の数を取得（フォロー新着ページも）
-  var searchSize = $("._image-items.autopagerize_page_element > .image-item").size();
-
+  var searchSize = $("._image-items > .image-item").size();
+	console.log(searchSize);
   /*
   他の絵の部分にはdata-tagsの値が入っていないので取得できない？
   */
@@ -96,7 +98,7 @@ function addBookmark(illustId,id,tag){
     datatype:"json",
     data:{
       mode: "add",
-      tt : "f04fc2ed380f79594cbf69bb9c10a7c2",
+      tt : "01c27dddd63d1b307b1c4b58020d6862",
       id : illustId,
       type: "illust",
       from_sid : "",
